@@ -4,14 +4,17 @@ import torch
 
 logger = logging.getLogger('epe.dataset.batch_types')
 
-
 def _safe_to(a, device):
+	'''将数据转到device上进行运算'''
 	return a.to(device, non_blocking=True) if a is not None else None
 
+# 
 def _safe_expand(a):
+	'''将数据a扩充一维.如果a不存在或者a的维度已经为4:return a'''
 	return a if a is None or a.dim() == 4 else a.unsqueeze(0)
 
 def _safe_cat(s, dim):
+	'''对张量s在dim维进行拼接'''
 	try: 
 		return torch.cat(s, dim)
 	except TypeError:
@@ -36,6 +39,7 @@ class ImageBatch(Batch):
 	"""
 
 	def __init__(self, img, path=None, coords=None):
+		'''初始化数据并扩充维度'''
 		self.img      = _safe_expand(img)
 		self.path     = path
 		self._coords  = (0, img.shape[-2], 0, img.shape[-1]) if coords is None else coords
@@ -45,6 +49,7 @@ class ImageBatch(Batch):
 		return ImageBatch(_safe_to(self.img, device), path=self.path)
 
 	def _make_new_crop_coords(self, r0, r1, c0, c1):
+		'''将准备crop的四个角标输入，输出这四个值组成的的tuple'''
 		return (self._coords[0]+r0, self._coords[0]+r1, self._coords[2]+c0, self._coords[2]+c1)
 
 	def crop(self, r0, r1, c0, c1):
@@ -54,6 +59,7 @@ class ImageBatch(Batch):
 
 	@classmethod
 	def collate_fn(cls, samples):
+		'''将抽取的样本堆叠'''
 		imgs          = _safe_cat([s.img for s in samples], 0)
 		paths         = [s.path for s in samples]
 		return ImageBatch(imgs, path=paths)
@@ -62,7 +68,8 @@ class ImageBatch(Batch):
 
 class EPEBatch(ImageBatch):
 	def __init__(self, img, gbuffers=None, gt_labels=None, robust_labels=None, path=None, coords=None):
-		""" Collect all input info for a network.
+		""" Collect all input info for a network. 
+			将所有的imgbatch信息转换为EPEbatch的格式
 
 		img           -- RGB image
 		gbuffers      -- multi-channel image with additional scene info (e.g., depth, surface normals, albedo)
@@ -82,6 +89,7 @@ class EPEBatch(ImageBatch):
 
 	@property
 	def imggbuf(self):
+		'''将图像与gbuffer在通道进行拼接'''
 		return torch.cat((self.img, self.gbuffers), 1)
 
 
