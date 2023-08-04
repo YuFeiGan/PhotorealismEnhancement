@@ -22,7 +22,7 @@ src_crops,_ = load_matching_crops(args.matched_crop_path)
 d = np.zeros((args.height, args.width), dtype=np.int32) 
 print('Computing density...')
 
-for s in tqdm(src_crops): # 将crop区域内所有像素值变为1，生成一个mask
+for s in tqdm(src_crops): # 将crop区域内所有像素值变+1.
 	d[s[1]:s[2],s[3]:s[4]] += 1 
 
 print('Computing individual weights...')

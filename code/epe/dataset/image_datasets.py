@@ -19,14 +19,14 @@ class ImageDataset(torch.utils.data.Dataset):
 		"""
 
 		name -- Name used for debugging, log messages.
-		img_paths - an iterable of paths to individual image files. Only JPG and PNG files will be taken.
+		img_paths -- an iterable of paths to individual image files. Only JPG and PNG files will be taken.
 		transform -- Transform to be applied to images during loading.
 		"""
 
 		img_paths  = [Path(p[0] if type(p) is tuple else p) for p in img_paths]
-		self.paths = sorted([p for p in img_paths if p.is_file() and p.suffix in ['.jpg', '.png']])
+		self.paths = sorted([p for p in img_paths if p.is_file() and p.suffix in ['.jpg', '.png']]) #将img_paths中的所有png和jpg文件排序
 		
-		self._path2id    = {p.stem:i for i,p in enumerate(self.paths)}
+		self._path2id    = {p.stem:i for i,p in enumerate(self.paths)}   # 创建一个{文件名：id}的dict  p.stem取p在.suffix之前的字符
 		self.transform   = transform
 		
 		self.name = name
@@ -37,7 +37,7 @@ class ImageDataset(torch.utils.data.Dataset):
 
 	def _load_img(self, path):
 		try:
-			return np.clip(imageio.imread(path).astype(np.float32) / 255.0, 0.0, 1.0)[:,:,:3]
+			return np.clip(imageio.imread(path).astype(np.float32) / 255.0, 0.0, 1.0)[:,:,:3] # 将输入图像进行归一化处理，[:,:,:3]是在颜色通道基础上再加一个通道
 		except:
 			logging.exception(f'Failed to load {path}.')
 			raise

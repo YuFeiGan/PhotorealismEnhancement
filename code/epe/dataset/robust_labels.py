@@ -28,12 +28,12 @@ class RobustlyLabeledDataset(ImageDataset):
 
 			if img_path.is_file() and img_path.suffix in ['.jpg', '.png'] and \
 				lab_path.is_file() and lab_path.suffix == '.png':
-				self._img2label[img_path] = lab_path
+				self._img2label[img_path] = lab_path   #img和label作为键值对放入_img2label这个dict中
 				pass
 			pass
 
 		self.paths           = sorted(self._img2label.keys())
-		self._path2id        = {p.stem:i for i,p in enumerate(self.paths)}
+		self._path2id        = {p.stem:i for i,p in enumerate(self.paths)} #(dict)_path2id={文件名：id}
 		self.transform       = img_transform
 		self.label_transform = label_transform
 		self.name            = name
@@ -69,8 +69,8 @@ class RobustlyLabeledDataset(ImageDataset):
 			robust_labels = self.label_transform(robust_labels)
 			pass
 
-		robust_labels = torch.LongTensor(robust_labels).unsqueeze(0)
+		robust_labels = torch.LongTensor(robust_labels).unsqueeze(0)   # 扩展1维
 
-		return EPEBatch(img, path=img_path, robust_labels=robust_labels)
+		return EPEBatch(img, path=img_path, robust_labels=robust_labels) # 组合robust和img的pair对，返回EPEBatch结构
 	pass
 
